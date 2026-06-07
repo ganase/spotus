@@ -14,7 +14,7 @@ struct PlaceListView: View {
                         HStack(spacing: 12) {
                             Image(systemName: place.category.systemImage)
                                 .frame(width: 28)
-                                .foregroundStyle(.accent)
+                                .foregroundStyle(Color.accentColor)
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(place.name)

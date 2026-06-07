@@ -1,13 +1,13 @@
-# HabitRoute MVP
+# Spotus MVP
 
-HabitRouteは、時間ベースではなく「場所 x 状況 x 生活コース」を使って、その場で最適な行動を促すiOS向けMVPです。
+Spotusは、時間ベースではなく「場所 x 状況 x 生活コース」を使って、その場で最適な行動を促すiOS向けMVPです。
 
 ## 1. ディレクトリ構成
 
 ```text
 spotus/
-  HabitRoute.xcodeproj/
-  HabitRouteApp.swift
+  Spotus.xcodeproj/
+  SpotusApp.swift
   Info.plist
   Assets.xcassets/
   Models/
@@ -19,7 +19,7 @@ spotus/
 
 | ファイル | 役割 |
 | --- | --- |
-| `HabitRouteApp.swift` | アプリのエントリーポイント。`AppState`を生成し全画面に共有する。 |
+| `SpotusApp.swift` | アプリのエントリーポイント。`AppState`を生成し全画面に共有する。 |
 | `Models/Place.swift` | 登録地点と場所カテゴリ。 |
 | `Models/HabitCourse.swift` | 生活改善コース。 |
 | `Models/HabitRule.swift` | コース、場所カテゴリ、時間帯、平日/休日、通知文の対応ルール。 |
@@ -96,7 +96,7 @@ func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegi
 
 ## 8. ローカル保存
 
-`LocalStore`がApplication Support内の`HabitRoute`フォルダに以下を保存します。
+`LocalStore`がApplication Support内の`Spotus`フォルダに以下を保存します。
 
 - `places.json`
 - `courses.json`
@@ -105,7 +105,7 @@ func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegi
 
 ## 9. 動作確認手順
 
-1. Xcodeで`HabitRoute.xcodeproj`を開く。
+1. Xcodeで`Spotus.xcodeproj`を開く。
 2. Signing & Capabilitiesで自分のTeamを設定する。
 3. iPhone実機、またはシミュレータで起動する。
 4. Home画面で通知許可と位置情報許可を付与する。実機でバックグラウンド動作を見る場合は「常に許可」を選ぶ。

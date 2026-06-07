@@ -40,7 +40,7 @@ final class LocalStore {
         let fileManager = FileManager.default
         let url = fileManager
             .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("HabitRoute", isDirectory: true)
+            .appendingPathComponent("Spotus", isDirectory: true)
 
         try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
         return url

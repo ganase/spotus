@@ -22,7 +22,7 @@ struct HomeView: View {
             }
             .padding()
         }
-        .navigationTitle("HabitRoute")
+        .navigationTitle("Spotus")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

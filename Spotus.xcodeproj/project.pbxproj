@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		010000000000000000000001 /* HabitRouteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000001 /* HabitRouteApp.swift */; };
+		010000000000000000000001 /* SpotusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000001 /* SpotusApp.swift */; };
 		010000000000000000000002 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000002 /* Place.swift */; };
 		010000000000000000000003 /* HabitCourse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000003 /* HabitCourse.swift */; };
 		010000000000000000000004 /* HabitRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000004 /* HabitRule.swift */; };
@@ -29,7 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		020000000000000000000001 /* HabitRouteApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRouteApp.swift; sourceTree = "<group>"; };
+		020000000000000000000001 /* SpotusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotusApp.swift; sourceTree = "<group>"; };
 		020000000000000000000002 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
 		020000000000000000000003 /* HabitCourse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitCourse.swift; sourceTree = "<group>"; };
 		020000000000000000000004 /* HabitRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRule.swift; sourceTree = "<group>"; };
@@ -49,7 +49,7 @@
 		020000000000000000000012 /* LogListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogListView.swift; sourceTree = "<group>"; };
 		020000000000000000000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		020000000000000000000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		020000000000000000000015 /* HabitRoute.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HabitRoute.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		020000000000000000000015 /* Spotus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spotus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,22 +66,22 @@
 		040000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				040000000000000000000002 /* HabitRoute */,
+				040000000000000000000002 /* Spotus */,
 				040000000000000000000006 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		040000000000000000000002 /* HabitRoute */ = {
+		040000000000000000000002 /* Spotus */ = {
 			isa = PBXGroup;
 			children = (
-				020000000000000000000001 /* HabitRouteApp.swift */,
+				020000000000000000000001 /* SpotusApp.swift */,
 				040000000000000000000003 /* Models */,
 				040000000000000000000004 /* Services */,
 				040000000000000000000005 /* Views */,
 				020000000000000000000014 /* Assets.xcassets */,
 				020000000000000000000013 /* Info.plist */,
 			);
-			name = HabitRoute;
+			name = Spotus;
 			sourceTree = "<group>";
 		};
 		040000000000000000000003 /* Models */ = {
@@ -125,7 +125,7 @@
 		040000000000000000000006 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				020000000000000000000015 /* HabitRoute.app */,
+				020000000000000000000015 /* Spotus.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -133,9 +133,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		050000000000000000000001 /* HabitRoute */ = {
+		050000000000000000000001 /* Spotus */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "HabitRoute" */;
+			buildConfigurationList = 0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "Spotus" */;
 			buildPhases = (
 				060000000000000000000001 /* Sources */,
 				030000000000000000000001 /* Frameworks */,
@@ -145,9 +145,9 @@
 			);
 			dependencies = (
 			);
-			name = HabitRoute;
-			productName = HabitRoute;
-			productReference = 020000000000000000000015 /* HabitRoute.app */;
+			name = Spotus;
+			productName = Spotus;
+			productReference = 020000000000000000000015 /* Spotus.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -165,7 +165,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 0A0000000000000000000001 /* Build configuration list for PBXProject "HabitRoute" */;
+			buildConfigurationList = 0A0000000000000000000001 /* Build configuration list for PBXProject "Spotus" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = ja;
 			hasScannedForEncodings = 0;
@@ -179,7 +179,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				050000000000000000000001 /* HabitRoute */,
+				050000000000000000000001 /* Spotus */,
 			);
 		};
 /* End PBXProject section */
@@ -200,7 +200,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				010000000000000000000001 /* HabitRouteApp.swift in Sources */,
+				010000000000000000000001 /* SpotusApp.swift in Sources */,
 				010000000000000000000002 /* Place.swift in Sources */,
 				010000000000000000000003 /* HabitCourse.swift in Sources */,
 				010000000000000000000004 /* HabitRule.swift in Sources */,
@@ -350,7 +350,7 @@
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.HabitRoute;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.Spotus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -370,7 +370,7 @@
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.HabitRoute;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.Spotus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -382,7 +382,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0A0000000000000000000001 /* Build configuration list for PBXProject "HabitRoute" */ = {
+		0A0000000000000000000001 /* Build configuration list for PBXProject "Spotus" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				090000000000000000000001 /* Debug */,
@@ -391,7 +391,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "HabitRoute" */ = {
+		0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "Spotus" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				090000000000000000000003 /* Debug */,
