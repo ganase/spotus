@@ -31,11 +31,11 @@ spotus/
 | `Services/LocationService.swift` | `CLLocationManager`の許可取得、現在地取得、Region Monitoring、`didEnterRegion`/`didExitRegion`。 |
 | `Services/AppState.swift` | 画面、保存、通知、位置情報サービスをつなぐアプリ状態。 |
 | `Views/RootTabView.swift` | Home/Course/Place/Rule/Logのタブ。 |
-| `Views/HomeView.swift` | 権限状態、有効コース、登録地点、直近ログを表示。 |
+| `Views/HomeView.swift` | 地図、有効コース、権限状態を表示。 |
 | `Views/CourseListView.swift` | コース一覧とON/OFF。 |
 | `Views/PlaceListView.swift` | 登録地点一覧、削除、ON/OFF、テスト通知。 |
 | `Views/PlaceEditorView.swift` | 場所の新規登録/編集。 |
-| `Views/RuleListView.swift` | プリセットルール一覧。 |
+| `Views/RuleListView.swift` | ルール一覧と通知文編集。 |
 | `Views/LogListView.swift` | 通知ログ一覧。 |
 
 ## 3. 最小実装コードの要点
@@ -44,8 +44,9 @@ spotus/
 - `PresetData`に読書、ジム、節酒、早寝、浪費防止、通勤時間活用コースを定義。
 - `RuleEngine.bestMatch(...)`が現在時刻の`TimeBlock`と平日/休日を判定し、最も具体的なルールを選ぶ。
 - `LocationService.syncMonitoring(for:)`が有効な登録地点を最大20件まで`CLCircularRegion`として監視する。
-- `LocationService.locationManager(_:didEnterRegion:)`から`AppState.handleRegionEvent(...)`に渡し、該当ルールがあれば通知とログを作る。
-- `NotificationService.deliver(...)`が即時ローカル通知を出し、通知アクション「やった」やdismiss/openをログに反映する。
+- `LocationService`は`didEnterRegion`に加えて`didDetermineState`でも監視状態を再確認し、入域イベントの取りこぼし回復を行う。
+- `AppState.handleRegionEvent(...)`がルール照合、フォールバック通知、重複抑制、ログ保存をまとめて行う。
+- `NotificationService.deliver(...)`が即時ローカル通知を出し、通知アクション「やった」「地図で見る」やdismiss/openをログに反映する。
 
 ## 4. 権限実装
 
@@ -84,7 +85,47 @@ spotus/
 
 MVPではenterを主に使いますが、exitもモデルとサービスで受け取れる状態にしています。
 
-## 7. didEnterRegionから通知まで
+## 7. 通知ロジックの判定表
+
+通知は、単に「スポットに着いたか」だけではなく、監視状態、重複、コースON/OFF、時間帯ルールまで含めて判定します。
+
+| 段階 | 条件 | 結果 |
+| --- | --- | --- |
+| 監視登録 | 位置情報許可が`authorizedAlways`または`authorizedWhenInUse`、かつ`Place.isEnabled == true` | 有効な先頭20地点をRegion Monitoringへ登録 |
+| 入域イベント | `didEnterRegion`を受信 | `enter`トリガーとして処理候補にする |
+| 取りこぼし回復 | `didDetermineState(.inside)`で前回状態が`outside` | `enter`トリガーを補完して処理候補にする |
+| 退域イベント | `didExitRegion`、または`didDetermineState(.outside)`で前回状態が`inside` | `exit`トリガーとして処理候補にする |
+| 重複抑制 | 同じ`placeId`かつ同じ`triggerType`の通知ログが120秒以内にある | 通知しない |
+| ルール一致 | 有効ルール、有効コース、場所カテゴリ、トリガー、時間帯、曜日がすべて一致 | コース名をタイトルにして通知する |
+| フォールバック | `enter`だが一致するルールがない、ただしその場所カテゴリを対象にする有効コースが1つ以上ある | `Spotus`タイトルで共通メッセージを通知する |
+| 通知なし | 場所が無効、監視外、`exit`で一致ルールなし、対象カテゴリの有効コースがない | 通知しない |
+
+## 8. ルール選択マトリクス
+
+`RuleEngine.bestMatch(...)`は、次の条件をすべて満たしたルール候補だけを残し、その中で「より具体的なルール」を優先します。
+
+| 判定軸 | 一致条件 | 例 |
+| --- | --- | --- |
+| コースON/OFF | `HabitCourse.isEnabled == true` | ジム継続コースがOFFなら、そのルールは使わない |
+| ルールON/OFF | `HabitRule.isEnabled == true` | 無効化したルールは使わない |
+| 場所カテゴリ | `rule.placeCategory == place.category` | 駅ルールは駅にだけ適用 |
+| トリガー | `rule.triggerType == enter/exit` | 到着通知は`enter`ルールのみ対象 |
+| 時間帯 | `rule.timeBlock.matches(date:)` | 朝/昼/夜/深夜/いつでも |
+| 曜日 | `rule.weekdayType.matches(date:)` | 平日/休日/毎日 |
+| コース対象カテゴリ | `course.targetCategories.contains(place.category)` | 読書習慣コースは駅・図書館・自宅に適用 |
+
+具体性の優先順位は次の通りです。
+
+| ルールの具体性 | 優先度 |
+| --- | --- |
+| 時間帯あり + 曜日あり | 最優先 |
+| 時間帯あり + 曜日なし | 次点 |
+| 時間帯なし + 曜日あり | その次 |
+| 時間帯なし + 曜日なし | 最後 |
+
+そのため、同じ場所カテゴリとトリガーに複数ルールがあっても、`夜 x 平日`のような具体ルールが`いつでも x 毎日`より優先されます。
+
+## 9. didEnterRegionから通知まで
 
 ```swift
 func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
@@ -92,9 +133,16 @@ func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegi
 }
 ```
 
-`region.identifier`から`Place.id`を復元し、`RuleEngine.bestMatch(...)`で有効コースとルールを照合します。該当すれば`TriggerLog`を保存し、同じ`logId`を通知の`userInfo`に入れてローカル通知を出します。
+実際の流れは次の通りです。
 
-## 8. ローカル保存
+1. `region.identifier`から`Place.id`を復元する。
+2. `RuleEngine.bestMatch(...)`で有効コースとルールを照合する。
+3. 一致ルールがあればその文言を使う。
+4. 一致しなくても、`enter`かつ対象カテゴリの有効コースがあれば共通メッセージへフォールバックする。
+5. 直近120秒以内の同一通知なら落とす。
+6. `TriggerLog`を保存し、同じ`logId`を通知の`userInfo`に入れてローカル通知を出す。
+
+## 10. ローカル保存
 
 `LocalStore`がApplication Support内の`Spotus`フォルダに以下を保存します。
 
@@ -102,8 +150,11 @@ func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegi
 - `courses.json`
 - `rules.json`
 - `logs.json`
+- `region_states.json`
 
-## 9. 動作確認手順
+`region_states.json`は、各監視地点が前回`inside`/`outside`のどちらだったかを保持し、`didDetermineState`で入域/退域を補完するときに使います。
+
+## 11. 動作確認手順
 
 1. Xcodeで`Spotus.xcodeproj`を開く。
 2. Signing & Capabilitiesで自分のTeamを設定する。
@@ -115,6 +166,6 @@ func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegi
 8. 実際のRegion Monitoring確認は、登録地点から十分離れた状態から半径内に入る、またはXcodeのLocation Simulationを使う。
 9. 通知が出たらLog画面で発火時刻、場所、コース、メッセージ、反応を確認する。
 
-## 10. MVP以降の拡張余地
+## 12. MVP以降の拡張余地
 
 地図UI、Apple Maps/Google Maps連携、AIメッセージ生成、通知アクション拡張、習慣達成率、危険ゾーン自動検出、コース別スコアリング、共有機能、Android版は、`Models`と`Services`を保ったまま追加しやすい構成にしています。
