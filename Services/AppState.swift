@@ -1,11 +1,25 @@
 import Foundation
 
+enum AppTab: Hashable {
+    case home
+    case actionCenter
+    case course
+    case place
+    case rule
+}
+
 @MainActor
 final class AppState: ObservableObject {
     struct MapSelection: Identifiable {
         let placeId: UUID
 
         var id: UUID { placeId }
+    }
+
+    private struct PendingNotificationResponse {
+        let logId: UUID
+        let placeId: UUID?
+        let action: UserAction
     }
 
     @Published var places: [Place] = [] {
@@ -34,6 +48,8 @@ final class AppState: ObservableObject {
     }
 
     @Published var mapSelection: MapSelection?
+    @Published var selectedTab: AppTab = .home
+    @Published var focusedLogId: UUID?
 
     let notificationService = NotificationService()
     let locationService = LocationService()
@@ -41,15 +57,12 @@ final class AppState: ObservableObject {
     private let store = LocalStore()
     private var hasBootstrapped = false
     private let duplicateNotificationWindow: TimeInterval = 120
+    private var pendingNotificationResponse: PendingNotificationResponse?
 
     init() {
         notificationService.onResponse = { [weak self] logId, placeId, action in
             Task { @MainActor in
-                self?.updateLogAction(logId: logId, action: action)
-
-                if action == .mapOpened, let placeId {
-                    self?.showMap(for: placeId)
-                }
+                self?.handleNotificationResponse(logId: logId, placeId: placeId, action: action)
             }
         }
 
@@ -78,6 +91,7 @@ final class AppState: ObservableObject {
         notificationService.refreshAuthorizationStatus()
         locationService.refreshAuthorizationStatus()
         syncRegionMonitoringIfReady()
+        applyPendingNotificationResponseIfNeeded()
 
         if locationService.authorizationStatus.allowsRegionMonitoring {
             requestCurrentLocation()
@@ -89,6 +103,14 @@ final class AppState: ObservableObject {
     }
 
     func requestLocationPermission() {
+        locationService.requestAlwaysAuthorization()
+    }
+
+    func requestForegroundLocationPermission() {
+        locationService.requestWhenInUseAuthorization()
+    }
+
+    func requestBackgroundLocationPermission() {
         locationService.requestAlwaysAuthorization()
     }
 
@@ -145,10 +167,44 @@ final class AppState: ObservableObject {
         places.first { $0.id == placeId }
     }
 
+    func log(for logId: UUID) -> TriggerLog? {
+        logs.first { $0.id == logId }
+    }
+
     func showMap(for placeId: UUID) {
         guard place(for: placeId) != nil else { return }
         requestCurrentLocation()
         mapSelection = MapSelection(placeId: placeId)
+    }
+
+    func openActionCenter(for logId: UUID) {
+        focusedLogId = logId
+        selectedTab = .actionCenter
+    }
+
+    func focusLog(_ logId: UUID) {
+        focusedLogId = logId
+    }
+
+    func actionGuide(for log: TriggerLog) -> ActionGuide {
+        if let actionGuide = log.actionGuide {
+            return actionGuide
+        }
+        return fallbackGuide(for: log)
+    }
+
+    func markDidAction(logId: UUID) {
+        updateLogAction(logId: logId, action: .didAction)
+        openActionCenter(for: logId)
+    }
+
+    func markAvoidedAction(logId: UUID) {
+        updateLogAction(logId: logId, action: .avoidedAction)
+        openActionCenter(for: logId)
+    }
+
+    var pendingActionCount: Int {
+        logs.filter { !$0.userAction.isResolved }.count
     }
 
     func courseName(for courseId: UUID?) -> String {
@@ -188,7 +244,8 @@ final class AppState: ObservableObject {
             placeId: place.id,
             courseId: payload.courseId,
             triggerType: triggerType,
-            message: payload.message
+            message: payload.message,
+            actionGuide: payload.actionGuide
         )
 
         logs.insert(log, at: 0)
@@ -196,6 +253,7 @@ final class AppState: ObservableObject {
 
         notificationService.deliver(
             title: payload.title,
+            subtitle: payload.subtitle,
             body: payload.message,
             logId: log.id,
             placeId: place.id,
@@ -203,9 +261,15 @@ final class AppState: ObservableObject {
         )
     }
 
-    private func notificationPayload(for place: Place, triggerType: TriggerType, match: RuleMatch?) -> (title: String, message: String, courseId: UUID?)? {
+    private func notificationPayload(for place: Place, triggerType: TriggerType, match: RuleMatch?) -> (title: String, subtitle: String, message: String, courseId: UUID?, actionGuide: ActionGuide)? {
         if let match {
-            return (match.course.name, match.message, match.course.id)
+            return (
+                notificationTitle(for: place),
+                match.course.name,
+                match.message,
+                match.course.id,
+                guide(for: place, match: match)
+            )
         }
 
         guard triggerType == .enter,
@@ -214,7 +278,13 @@ final class AppState: ObservableObject {
             return nil
         }
 
-        return ("Spotus", fallbackMessage(for: place), nil)
+        return (
+            notificationTitle(for: place),
+            "Spotus",
+            fallbackMessage(for: place),
+            nil,
+            fallbackGuide(for: place)
+        )
     }
 
     private func fallbackMessage(for place: Place) -> String {
@@ -246,9 +316,122 @@ final class AppState: ObservableObject {
         return Date().timeIntervalSince(latestLog.triggeredAt) < duplicateNotificationWindow
     }
 
+    private func notificationTitle(for place: Place) -> String {
+        "\(place.category.notificationEmoji) \(place.name)で次の一歩"
+    }
+
+    private func guide(for place: Place, match: RuleMatch) -> ActionGuide {
+        PresetData.guide(for: match.rule.id) ?? fallbackGuide(for: place)
+    }
+
+    private func fallbackGuide(for log: TriggerLog) -> ActionGuide {
+        guard let place = place(for: log.placeId) else {
+            return ActionGuide(
+                doText: log.message.replacingOccurrences(of: "。", with: ""),
+                avoidText: "流れで先送りにする"
+            )
+        }
+        return fallbackGuide(for: place)
+    }
+
+    private func fallbackGuide(for place: Place) -> ActionGuide {
+        switch place.category {
+        case .home:
+            return ActionGuide(
+                doText: "帰宅後すぐに小さな習慣を1つ始める",
+                avoidText: "そのままだらだら過ごし始める"
+            )
+        case .station:
+            return ActionGuide(
+                doText: "移動時間の最初の5分を習慣に使う",
+                avoidText: "乗車時間を何となく流す"
+            )
+        case .office:
+            return ActionGuide(
+                doText: "最初の5分で一番大事な作業に着手する",
+                avoidText: "雑務から始める"
+            )
+        case .gym:
+            return ActionGuide(
+                doText: "5分だけでも体を動かし始める",
+                avoidText: "着いてから長く迷う"
+            )
+        case .library:
+            return ActionGuide(
+                doText: "10分だけ静かな集中時間を作る",
+                avoidText: "別の作業に気を取られる"
+            )
+        case .barArea:
+            return ActionGuide(
+                doText: "そのまま帰るか、水だけで切り上げる",
+                avoidText: "流れで店に入る"
+            )
+        case .convenienceStore:
+            return ActionGuide(
+                doText: "必要なものだけ確認して買う",
+                avoidText: "ついで買いを増やす"
+            )
+        case .other:
+            return ActionGuide(
+                doText: "1分だけでも習慣を始める",
+                avoidText: "また後でにする"
+            )
+        }
+    }
+
+    private func handleNotificationResponse(logId: UUID, placeId: UUID?, action: UserAction) {
+        guard hasBootstrapped else {
+            pendingNotificationResponse = PendingNotificationResponse(logId: logId, placeId: placeId, action: action)
+            return
+        }
+        applyNotificationResponse(logId: logId, placeId: placeId, action: action)
+    }
+
+    private func applyPendingNotificationResponseIfNeeded() {
+        guard let pendingNotificationResponse else { return }
+        self.pendingNotificationResponse = nil
+        applyNotificationResponse(
+            logId: pendingNotificationResponse.logId,
+            placeId: pendingNotificationResponse.placeId,
+            action: pendingNotificationResponse.action
+        )
+    }
+
+    private func applyNotificationResponse(logId: UUID, placeId: UUID?, action: UserAction) {
+        updateLogAction(logId: logId, action: action)
+
+        switch action {
+        case .opened:
+            openActionCenter(for: logId)
+        case .mapOpened:
+            if let placeId {
+                showMap(for: placeId)
+            }
+        case .ignored, .completed, .didAction, .avoidedAction, .dismissed:
+            break
+        }
+    }
+
     private func updateLogAction(logId: UUID, action: UserAction) {
         guard let index = logs.firstIndex(where: { $0.id == logId }) else { return }
-        logs[index].userAction = action
+        logs[index].userAction = mergeUserAction(current: logs[index].userAction, incoming: action)
+    }
+
+    private func mergeUserAction(current: UserAction, incoming: UserAction) -> UserAction {
+        if current.isResolved {
+            return current
+        }
+
+        if incoming.isResolved {
+            return incoming
+        }
+
+        switch (current, incoming) {
+        case (.mapOpened, .opened):
+            return .mapOpened
+        default:
+            return incoming
+        }
     }
 
     private func syncRegionMonitoringIfReady() {

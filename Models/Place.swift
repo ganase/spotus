@@ -88,4 +88,25 @@ enum PlaceCategory: String, Codable, CaseIterable, Identifiable {
             return "mappin"
         }
     }
+
+    var notificationEmoji: String {
+        switch self {
+        case .home:
+            return "🏠"
+        case .station:
+            return "🚉"
+        case .office:
+            return "🏢"
+        case .gym:
+            return "🏋️"
+        case .library:
+            return "📚"
+        case .barArea:
+            return "🍷"
+        case .convenienceStore:
+            return "🛒"
+        case .other:
+            return "📍"
+        }
+    }
 }

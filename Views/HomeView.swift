@@ -1,12 +1,23 @@
 import CoreLocation
 import MapKit
 import SwiftUI
+import UIKit
 
 struct HomeView: View {
     @EnvironmentObject private var appState: AppState
+    @Environment(\.openURL) private var openURL
+    @State private var isAppInfoPresented = false
 
     private var activeCourses: [HabitCourse] {
         appState.courses.filter(\.isEnabled)
+    }
+
+    private var isLocationReady: Bool {
+        appState.locationService.authorizationStatus == .authorizedAlways
+    }
+
+    private var isNotificationReady: Bool {
+        appState.notificationService.authorizationStatus.allowsHabitNotifications
     }
 
     var body: some View {
@@ -20,6 +31,14 @@ struct HomeView: View {
         }
         .navigationTitle("Spotus")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    isAppInfoPresented = true
+                } label: {
+                    Label("情報", systemImage: "info.circle")
+                }
+            }
+
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     appState.requestCurrentLocation()
@@ -28,6 +47,9 @@ struct HomeView: View {
                 }
             }
         }
+        .sheet(isPresented: $isAppInfoPresented) {
+            AppInfoView()
+        }
     }
 
     private var permissionCard: some View {
@@ -35,43 +57,80 @@ struct HomeView: View {
             Text("権限")
                 .font(.headline)
 
+            if !isLocationReady || !isNotificationReady {
+                setupGuidance
+            }
+
             StatusRow(
                 title: "位置情報",
                 value: appState.locationService.authorizationStatus.habitRouteDisplayName,
                 systemImage: "location.fill",
-                isHealthy: appState.locationService.authorizationStatus == .authorizedAlways
+                isHealthy: isLocationReady
             )
 
             StatusRow(
                 title: "通知",
                 value: appState.notificationService.authorizationStatus.habitRouteDisplayName,
                 systemImage: "bell.fill",
-                isHealthy: appState.notificationService.authorizationStatus == .authorized
+                isHealthy: isNotificationReady
             )
 
             HStack {
-                Button {
-                    appState.requestLocationPermission()
-                } label: {
-                    Label("位置情報を許可", systemImage: "location.circle")
+                if let action = locationPermissionAction {
+                    Button {
+                        handleLocationPermissionAction()
+                    } label: {
+                        Label(action.title, systemImage: action.systemImage)
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
 
-                Button {
-                    appState.requestNotificationPermission()
-                } label: {
-                    Label("通知を許可", systemImage: "bell.circle")
+                if let action = notificationPermissionAction {
+                    Button {
+                        handleNotificationPermissionAction()
+                    } label: {
+                        Label(action.title, systemImage: action.systemImage)
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
             }
 
-            if appState.locationService.authorizationStatus != .authorizedAlways {
+            if appState.locationService.authorizationStatus == .authorizedWhenInUse {
                 Label("バックグラウンド通知には「常に許可」が必要です。", systemImage: "exclamationmark.triangle")
                     .font(.footnote)
                     .foregroundStyle(.orange)
             }
         }
         .cardStyle()
+    }
+
+    private var setupGuidance: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("到着通知を使う準備", systemImage: "checklist")
+                .font(.subheadline.weight(.semibold))
+
+            Text("Spotusは、登録地点への到着判定に位置情報を使い、通知は端末内のローカル通知として表示します。")
+                .font(.subheadline)
+
+            VStack(alignment: .leading, spacing: 6) {
+                setupStep(
+                    number: 1,
+                    text: "まず位置情報を許可し、地点登録や現在地確認を使えるようにします。"
+                )
+                setupStep(
+                    number: 2,
+                    text: "バックグラウンド到着通知を受けるには、位置情報を「常に許可」にします。"
+                )
+                setupStep(
+                    number: 3,
+                    text: "最後に通知を許可すると、Spotusを閉じていても到着時に通知できます。"
+                )
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.accentColor.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     private var courseCard: some View {
@@ -139,6 +198,80 @@ struct HomeView: View {
             }
         }
         .cardStyle()
+    }
+
+    private var locationPermissionAction: PermissionAction? {
+        switch appState.locationService.authorizationStatus {
+        case .notDetermined:
+            return PermissionAction(title: "位置情報を許可", systemImage: "location.circle")
+        case .authorizedWhenInUse:
+            return PermissionAction(title: "常に許可へ進む", systemImage: "location.badge.plus")
+        case .restricted, .denied:
+            return PermissionAction(title: "位置情報の設定を開く", systemImage: "gearshape")
+        case .authorizedAlways:
+            return nil
+        @unknown default:
+            return PermissionAction(title: "位置情報の設定を開く", systemImage: "gearshape")
+        }
+    }
+
+    private var notificationPermissionAction: PermissionAction? {
+        switch appState.notificationService.authorizationStatus {
+        case .notDetermined:
+            return PermissionAction(title: "通知を許可", systemImage: "bell.circle")
+        case .denied:
+            return PermissionAction(title: "通知の設定を開く", systemImage: "gearshape")
+        case .authorized, .provisional, .ephemeral:
+            return nil
+        @unknown default:
+            return PermissionAction(title: "通知の設定を開く", systemImage: "gearshape")
+        }
+    }
+
+    private func handleLocationPermissionAction() {
+        switch appState.locationService.authorizationStatus {
+        case .notDetermined:
+            appState.requestForegroundLocationPermission()
+        case .authorizedWhenInUse:
+            appState.requestBackgroundLocationPermission()
+        case .restricted, .denied:
+            openAppSettings()
+        case .authorizedAlways:
+            break
+        @unknown default:
+            openAppSettings()
+        }
+    }
+
+    private func handleNotificationPermissionAction() {
+        switch appState.notificationService.authorizationStatus {
+        case .notDetermined:
+            appState.requestNotificationPermission()
+        case .denied:
+            openAppSettings()
+        case .authorized, .provisional, .ephemeral:
+            break
+        @unknown default:
+            openAppSettings()
+        }
+    }
+
+    private func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        openURL(url)
+    }
+
+    private func setupStep(number: Int, text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("\(number).")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 16, alignment: .leading)
+
+            Text(text)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
     }
 }
 
@@ -285,6 +418,63 @@ private struct StatusRow: View {
     }
 }
 
+private struct PermissionAction {
+    let title: String
+    let systemImage: String
+}
+
+private struct AppInfoView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    private var versionText: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "-"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "-"
+        return "バージョン \(version) / ビルド \(build)"
+    }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Spotusについて") {
+                    Text("Spotusは、登録地点への到着や離脱をきっかけに、その場で取り組みやすい小さな習慣を通知するアプリです。")
+                    Text("確認しやすいように、Place画面では各地点を左にスワイプして通知テストを実行できます。")
+                }
+
+                Section("権限の使い方") {
+                    Label("位置情報は、登録地点への到着判定と地図上の現在地表示に使います。", systemImage: "location.fill")
+                    Label("位置情報を「常に許可」にすると、Spotusを閉じていても到着通知を受け取れます。", systemImage: "location.badge.plus")
+                    Label("通知は、端末内のローカル通知として表示します。", systemImage: "bell.badge.fill")
+                }
+
+                Section("プライバシー") {
+                    Text("登録地点、コース設定、一歩の履歴は端末内のApplication Supportに保存します。")
+                    Text("このMVPはサーバー送信やアカウント連携を持たず、位置情報や一歩の履歴を外部へアップロードしません。")
+                }
+
+                Section("サポート") {
+                    Text("通知が届かない場合は、位置情報が「常に許可」になっているか、通知が許可されているかを確認してください。")
+                    Text("審査や動作確認では、Place画面の「テスト」で通知経路をすぐ確認できます。")
+                }
+
+                Section {
+                    Text(versionText)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("情報")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("閉じる") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
 private extension View {
     func cardStyle() -> some View {
         self
@@ -293,5 +483,18 @@ private extension View {
             .background(.background)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
+    }
+}
+
+private extension UNAuthorizationStatus {
+    var allowsHabitNotifications: Bool {
+        switch self {
+        case .authorized, .provisional, .ephemeral:
+            return true
+        case .notDetermined, .denied:
+            return false
+        @unknown default:
+            return false
+        }
     }
 }

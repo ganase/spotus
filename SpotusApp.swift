@@ -11,8 +11,6 @@ struct SpotusApp: App {
                 .environmentObject(appState)
                 .task {
                     appState.bootstrap()
-                    appState.requestLocationPermission()
-                    appState.requestNotificationPermission()
                 }
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .active {

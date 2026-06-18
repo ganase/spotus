@@ -7,6 +7,7 @@ struct TriggerLog: Identifiable, Codable, Equatable {
     var triggeredAt: Date
     var triggerType: TriggerType
     var message: String
+    var actionGuide: ActionGuide?
     var userAction: UserAction
 
     init(
@@ -16,6 +17,7 @@ struct TriggerLog: Identifiable, Codable, Equatable {
         triggeredAt: Date = Date(),
         triggerType: TriggerType,
         message: String,
+        actionGuide: ActionGuide? = nil,
         userAction: UserAction = .ignored
     ) {
         self.id = id
@@ -24,8 +26,14 @@ struct TriggerLog: Identifiable, Codable, Equatable {
         self.triggeredAt = triggeredAt
         self.triggerType = triggerType
         self.message = message
+        self.actionGuide = actionGuide
         self.userAction = userAction
     }
+}
+
+struct ActionGuide: Codable, Equatable {
+    var doText: String
+    var avoidText: String
 }
 
 enum UserAction: String, Codable, CaseIterable, Identifiable {
@@ -33,6 +41,8 @@ enum UserAction: String, Codable, CaseIterable, Identifiable {
     case opened
     case mapOpened
     case completed
+    case didAction = "did_action"
+    case avoidedAction = "avoided_action"
     case dismissed
 
     var id: String { rawValue }
@@ -46,9 +56,35 @@ enum UserAction: String, Codable, CaseIterable, Identifiable {
         case .mapOpened:
             return "地図で開いた"
         case .completed:
-            return "やった"
+            return "完了"
+        case .didAction:
+            return "実行できた"
+        case .avoidedAction:
+            return "見送れた"
         case .dismissed:
             return "閉じた"
+        }
+    }
+
+    var isResolved: Bool {
+        switch self {
+        case .completed, .didAction, .avoidedAction:
+            return true
+        case .ignored, .opened, .mapOpened, .dismissed:
+            return false
+        }
+    }
+
+    var statusIcon: String {
+        switch self {
+        case .completed, .didAction, .avoidedAction:
+            return "checkmark.seal.fill"
+        case .opened, .mapOpened:
+            return "hand.tap.fill"
+        case .dismissed:
+            return "bell.slash"
+        case .ignored:
+            return "clock"
         }
     }
 }

@@ -47,6 +47,10 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         manager.requestAlwaysAuthorization()
     }
 
+    func requestWhenInUseAuthorization() {
+        manager.requestWhenInUseAuthorization()
+    }
+
     func requestCurrentLocation() {
         manager.requestLocation()
     }

@@ -23,20 +23,20 @@ spotus/
 | `Models/Place.swift` | 登録地点と場所カテゴリ。 |
 | `Models/HabitCourse.swift` | 生活改善コース。 |
 | `Models/HabitRule.swift` | コース、場所カテゴリ、時間帯、平日/休日、通知文の対応ルール。 |
-| `Models/TriggerLog.swift` | 通知発火ログとユーザー反応。 |
+| `Models/TriggerLog.swift` | 通知発火履歴、一歩ガイド、ユーザー反応。 |
 | `Services/PresetData.swift` | MVP用のプリセットコースとプリセットルール。 |
 | `Services/LocalStore.swift` | Application Support配下へのJSON保存/読み込み。 |
 | `Services/RuleEngine.swift` | 場所、トリガー、時刻、コースON/OFFから通知ルールを選ぶ。 |
 | `Services/NotificationService.swift` | `UNUserNotificationCenter`の許可取得、ローカル通知、通知アクション処理。 |
 | `Services/LocationService.swift` | `CLLocationManager`の許可取得、現在地取得、Region Monitoring、`didEnterRegion`/`didExitRegion`。 |
 | `Services/AppState.swift` | 画面、保存、通知、位置情報サービスをつなぐアプリ状態。 |
-| `Views/RootTabView.swift` | Home/Course/Place/Rule/Logのタブ。 |
+| `Views/RootTabView.swift` | Home/一歩/Course/Place/Ruleのタブ。 |
 | `Views/HomeView.swift` | 地図、有効コース、権限状態を表示。 |
 | `Views/CourseListView.swift` | コース一覧とON/OFF。 |
 | `Views/PlaceListView.swift` | 登録地点一覧、削除、ON/OFF、テスト通知。 |
 | `Views/PlaceEditorView.swift` | 場所の新規登録/編集。 |
 | `Views/RuleListView.swift` | ルール一覧と通知文編集。 |
-| `Views/LogListView.swift` | 通知ログ一覧。 |
+| `Views/LogListView.swift` | 通知から開く「一歩」画面。一歩ガイド、完了操作、履歴一覧。 |
 
 ## 3. 最小実装コードの要点
 
@@ -46,7 +46,7 @@ spotus/
 - `LocationService.syncMonitoring(for:)`が有効な登録地点を最大20件まで`CLCircularRegion`として監視する。
 - `LocationService`は`didEnterRegion`に加えて`didDetermineState`でも監視状態を再確認し、入域イベントの取りこぼし回復を行う。
 - `AppState.handleRegionEvent(...)`がルール照合、フォールバック通知、重複抑制、ログ保存をまとめて行う。
-- `NotificationService.deliver(...)`が即時ローカル通知を出し、通知アクション「やった」「地図で見る」やdismiss/openをログに反映する。
+- `NotificationService.deliver(...)`が即時ローカル通知を出し、通知タップ時は「一歩」画面へ進み、通知アクション「地図で見る」やdismiss/openを履歴に反映する。
 
 ## 4. 権限実装
 
@@ -58,7 +58,13 @@ spotus/
 
 通知許可は`NotificationService.requestAuthorization()`で`.alert`, `.sound`, `.badge`を要求します。
 
-位置情報許可は`LocationService.requestAlwaysAuthorization()`で要求します。バックグラウンドでRegion Monitoringを使うには、ユーザーが「常に許可」を選ぶ必要があります。
+位置情報は、まず`LocationService.requestWhenInUseAuthorization()`で前景利用を案内し、その後`LocationService.requestAlwaysAuthorization()`でバックグラウンド通知に必要な「常に許可」へ進める構成にしています。
+
+起動直後にいきなり権限ダイアログは出さず、Home画面の権限カードで以下を先に説明します。
+
+1. 位置情報は登録地点への到着判定に使う
+2. 「常に許可」でSpotusを閉じていても到着通知を出せる
+3. 通知はサーバー送信ではなく端末内のローカル通知として表示する
 
 ## 5. プリセットコースとルール
 
@@ -140,7 +146,7 @@ func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegi
 3. 一致ルールがあればその文言を使う。
 4. 一致しなくても、`enter`かつ対象カテゴリの有効コースがあれば共通メッセージへフォールバックする。
 5. 直近120秒以内の同一通知なら落とす。
-6. `TriggerLog`を保存し、同じ`logId`を通知の`userInfo`に入れてローカル通知を出す。
+6. `TriggerLog`を保存し、同じ`logId`と一歩ガイドを通知の`userInfo`と履歴に関連付けてローカル通知を出す。
 
 ## 10. ローカル保存
 
@@ -159,13 +165,24 @@ func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegi
 1. Xcodeで`Spotus.xcodeproj`を開く。
 2. Signing & Capabilitiesで自分のTeamを設定する。
 3. iPhone実機、またはシミュレータで起動する。
-4. Home画面で通知許可と位置情報許可を付与する。実機でバックグラウンド動作を見る場合は「常に許可」を選ぶ。
-5. Place画面で駅、自宅、ジム、飲み屋街などを追加する。
-6. Course画面で使いたいコースをONにする。
-7. すぐ確認したい場合はPlace画面で対象地点を左からスワイプし、「テスト」を押す。
-8. 実際のRegion Monitoring確認は、登録地点から十分離れた状態から半径内に入る、またはXcodeのLocation Simulationを使う。
-9. 通知が出たらLog画面で発火時刻、場所、コース、メッセージ、反応を確認する。
+4. Home画面の権限カードを読み、まず位置情報を許可する。
+5. バックグラウンド動作を見る場合は、続けて位置情報を「常に許可」にする。
+6. 通知を許可する。
+7. Place画面で駅、自宅、ジム、飲み屋街などを追加する。
+8. Course画面で使いたいコースをONにする。
+9. すぐ確認したい場合はPlace画面で対象地点を左からスワイプし、「テスト」を押す。
+10. 実際のRegion Monitoring確認は、登録地点から十分離れた状態から半径内に入る、またはXcodeのLocation Simulationを使う。
+11. 通知をタップするとHomeではなく「一歩」画面が開き、やること / 控えること / 完了操作を確認できる。
+12. 完了後は「一歩」画面で発火時刻、場所、コース、メッセージ、反応を履歴として確認する。
 
-## 12. MVP以降の拡張余地
+## 12. App Store提出前の補強点
+
+- Home画面に、権限ダイアログの前に目的を説明する権限カードを配置。
+- Home画面左上の「情報」から、権限の使い方、プライバシー、サポート案内を確認可能。
+- Place画面の「テスト」で、実際の移動を待たずに通知経路を確認可能。
+- 通知タイトルは絵文字付きの`「場所名で次の一歩」`形式にし、見つけやすさを強める。
+- App Store ConnectのReview Notesには、`Place`画面で地点を左スワイプして`テスト`を押すと通知確認できる旨を記載する前提。
+
+## 13. MVP以降の拡張余地
 
 地図UI、Apple Maps/Google Maps連携、AIメッセージ生成、通知アクション拡張、習慣達成率、危険ゾーン自動検出、コース別スコアリング、共有機能、Android版は、`Models`と`Services`を保ったまま追加しやすい構成にしています。

@@ -41,7 +41,7 @@ struct PlaceListView: View {
                 }
                 .onDelete(perform: appState.deletePlaces)
             } footer: {
-                Text("iOSのRegion Monitoringは同時監視数に上限があります。MVPでは有効な地点の先頭20件を登録します。")
+                Text("各地点を左にスワイプすると、実際の移動を待たずに通知経路を確認できる「テスト」を使えます。iOSのRegion Monitoringは同時監視数に上限があるため、MVPでは有効な地点の先頭20件を登録します。")
             }
         }
         .navigationTitle("Place")

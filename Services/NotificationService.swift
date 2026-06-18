@@ -3,7 +3,6 @@ import UserNotifications
 
 final class NotificationService: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
     static let categoryIdentifier = "SPOTUS_ACTIONS"
-    static let completedActionIdentifier = "SPOTUS_COMPLETED"
     static let mapActionIdentifier = "SPOTUS_SHOW_MAP"
 
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
@@ -33,9 +32,10 @@ final class NotificationService: NSObject, ObservableObject, UNUserNotificationC
         }
     }
 
-    func deliver(title: String, body: String, logId: UUID, placeId: UUID, courseId: UUID?) {
+    func deliver(title: String, subtitle: String, body: String, logId: UUID, placeId: UUID, courseId: UUID?) {
         let content = UNMutableNotificationContent()
         content.title = title
+        content.subtitle = subtitle
         content.body = body
         content.sound = .default
         content.categoryIdentifier = Self.categoryIdentifier
@@ -57,15 +57,9 @@ final class NotificationService: NSObject, ObservableObject, UNUserNotificationC
             options: [.foreground]
         )
 
-        let completed = UNNotificationAction(
-            identifier: Self.completedActionIdentifier,
-            title: "やった",
-            options: [.foreground]
-        )
-
         let category = UNNotificationCategory(
             identifier: Self.categoryIdentifier,
-            actions: [showMap, completed],
+            actions: [showMap],
             intentIdentifiers: [],
             options: [.customDismissAction]
         )
@@ -102,8 +96,6 @@ final class NotificationService: NSObject, ObservableObject, UNUserNotificationC
         switch response.actionIdentifier {
         case Self.mapActionIdentifier:
             action = .mapOpened
-        case Self.completedActionIdentifier:
-            action = .completed
         case UNNotificationDismissActionIdentifier:
             action = .dismissed
         default:

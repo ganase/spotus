@@ -217,4 +217,71 @@ enum PresetData {
             message: "職場に着きました。最初の25分で一番大事な作業に着手しましょう。"
         )
     ]
+
+    static func guide(for ruleId: UUID) -> ActionGuide? {
+        ruleGuides[ruleId]
+    }
+
+    private static let ruleGuides: [UUID: ActionGuide] = [
+        UUID(uuidString: "A0000001-0000-0000-0000-000000000001")!: ActionGuide(
+            doText: "電車に乗ったら10ページだけ読む",
+            avoidText: "移動時間を何となくスマホで埋める"
+        ),
+        UUID(uuidString: "A0000002-0000-0000-0000-000000000002")!: ActionGuide(
+            doText: "最初の15分は静かに読書する",
+            avoidText: "席に着いてから別の用事を始める"
+        ),
+        UUID(uuidString: "A0000003-0000-0000-0000-000000000003")!: ActionGuide(
+            doText: "本を1ページだけ開く",
+            avoidText: "先にスマホを見る"
+        ),
+        UUID(uuidString: "B0000001-0000-0000-0000-000000000001")!: ActionGuide(
+            doText: "帰宅前にジムへ向かう",
+            avoidText: "そのまま駅から帰ってしまう"
+        ),
+        UUID(uuidString: "B0000002-0000-0000-0000-000000000002")!: ActionGuide(
+            doText: "まず5分だけ体を動かし始める",
+            avoidText: "着いてすぐ休憩モードに入る"
+        ),
+        UUID(uuidString: "B0000003-0000-0000-0000-000000000003")!: ActionGuide(
+            doText: "家でスクワット10回だけやる",
+            avoidText: "ソファに座ってそのまま終える"
+        ),
+        UUID(uuidString: "C0000001-0000-0000-0000-000000000001")!: ActionGuide(
+            doText: "ここで曲がらず、そのまま帰る",
+            avoidText: "勢いで店に入る"
+        ),
+        UUID(uuidString: "C0000002-0000-0000-0000-000000000002")!: ActionGuide(
+            doText: "水だけ買って帰る",
+            avoidText: "深夜の一杯に流れる"
+        ),
+        UUID(uuidString: "C0000003-0000-0000-0000-000000000003")!: ActionGuide(
+            doText: "そのまま帰宅する",
+            avoidText: "別の店や寄り道に向かう"
+        ),
+        UUID(uuidString: "D0000001-0000-0000-0000-000000000001")!: ActionGuide(
+            doText: "3分だけストレッチして寝る準備を始める",
+            avoidText: "帰宅後にだらだら画面を見る"
+        ),
+        UUID(uuidString: "D0000002-0000-0000-0000-000000000002")!: ActionGuide(
+            doText: "必要なものだけ買って切り上げる",
+            avoidText: "夜食や余計な買い足しをする"
+        ),
+        UUID(uuidString: "E0000001-0000-0000-0000-000000000001")!: ActionGuide(
+            doText: "必要なものだけ確認して買う",
+            avoidText: "ついで買いを増やす"
+        ),
+        UUID(uuidString: "E0000002-0000-0000-0000-000000000002")!: ActionGuide(
+            doText: "寄り道せず帰る",
+            avoidText: "気分で出費を増やす"
+        ),
+        UUID(uuidString: "F0000001-0000-0000-0000-000000000001")!: ActionGuide(
+            doText: "移動中に今日のタスクを3つだけ整理する",
+            avoidText: "乗車時間を漫然と流す"
+        ),
+        UUID(uuidString: "F0000002-0000-0000-0000-000000000002")!: ActionGuide(
+            doText: "最優先の作業を最初の25分で始める",
+            avoidText: "メールや雑務から入る"
+        )
+    ]
 }
