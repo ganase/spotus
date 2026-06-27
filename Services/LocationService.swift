@@ -63,7 +63,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         stopMonitoringHabitRegions()
 
         guard CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self),
-              authorizationStatus == .authorizedAlways || authorizationStatus == .authorizedWhenInUse
+              authorizationStatus.allowsRegionMonitoring
         else {
             monitoredRegionIdentifiers = []
             monitoredRegionCount = 0
@@ -173,21 +173,13 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        let previousState = persistedRegionStates[region.identifier] ?? .unknown
         updatePersistedState(.inside, for: region.identifier)
-
-        if previousState != .inside {
-            handle(region: region, triggerType: .enter)
-        }
+        handle(region: region, triggerType: .enter)
     }
 
     func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        let previousState = persistedRegionStates[region.identifier] ?? .unknown
         updatePersistedState(.outside, for: region.identifier)
-
-        if previousState != .outside {
-            handle(region: region, triggerType: .exit)
-        }
+        handle(region: region, triggerType: .exit)
     }
 
     func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
@@ -230,6 +222,6 @@ extension CLAuthorizationStatus {
     }
 
     var allowsRegionMonitoring: Bool {
-        self == .authorizedAlways || self == .authorizedWhenInUse
+        self == .authorizedAlways
     }
 }

@@ -3,31 +3,107 @@ import Foundation
 struct HabitRule: Identifiable, Codable, Equatable {
     var id: UUID
     var courseId: UUID
+    var placeId: UUID?
     var placeCategory: PlaceCategory
     var triggerType: TriggerType
     var timeBlock: TimeBlock
     var weekdayType: WeekdayType
     var message: String
+    var tasks: [RuleTask]
     var isEnabled: Bool
 
     init(
         id: UUID = UUID(),
         courseId: UUID,
+        placeId: UUID? = nil,
         placeCategory: PlaceCategory,
         triggerType: TriggerType,
         timeBlock: TimeBlock = .any,
         weekdayType: WeekdayType = .any,
         message: String,
+        tasks: [RuleTask]? = nil,
         isEnabled: Bool = true
     ) {
         self.id = id
         self.courseId = courseId
+        self.placeId = placeId
         self.placeCategory = placeCategory
         self.triggerType = triggerType
         self.timeBlock = timeBlock
         self.weekdayType = weekdayType
         self.message = message
+        self.tasks = tasks ?? [RuleTask(title: message)]
         self.isEnabled = isEnabled
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case courseId
+        case placeId
+        case placeCategory
+        case triggerType
+        case timeBlock
+        case weekdayType
+        case message
+        case tasks
+        case isEnabled
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        courseId = try container.decode(UUID.self, forKey: .courseId)
+        placeId = try container.decodeIfPresent(UUID.self, forKey: .placeId)
+        placeCategory = try container.decode(PlaceCategory.self, forKey: .placeCategory)
+        triggerType = try container.decode(TriggerType.self, forKey: .triggerType)
+        timeBlock = try container.decodeIfPresent(TimeBlock.self, forKey: .timeBlock) ?? .any
+        weekdayType = try container.decodeIfPresent(WeekdayType.self, forKey: .weekdayType) ?? .any
+        message = try container.decode(String.self, forKey: .message)
+        tasks = try container.decodeIfPresent([RuleTask].self, forKey: .tasks) ?? [RuleTask(title: message)]
+        isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? true
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(courseId, forKey: .courseId)
+        try container.encodeIfPresent(placeId, forKey: .placeId)
+        try container.encode(placeCategory, forKey: .placeCategory)
+        try container.encode(triggerType, forKey: .triggerType)
+        try container.encode(timeBlock, forKey: .timeBlock)
+        try container.encode(weekdayType, forKey: .weekdayType)
+        try container.encode(message, forKey: .message)
+        try container.encode(tasks, forKey: .tasks)
+        try container.encode(isEnabled, forKey: .isEnabled)
+    }
+}
+
+struct RuleTask: Identifiable, Codable, Equatable {
+    var id: UUID
+    var title: String
+
+    init(id: UUID = UUID(), title: String) {
+        self.id = id
+        self.title = title
+    }
+}
+
+struct ActTemplate: Identifiable, Equatable {
+    var title: String
+    var usageCount: Int
+
+    var id: String { title }
+}
+
+struct CourseStepDraft: Identifiable, Equatable {
+    var id: UUID
+    var placeId: UUID?
+    var actTitle: String
+
+    init(id: UUID = UUID(), placeId: UUID? = nil, actTitle: String = "") {
+        self.id = id
+        self.placeId = placeId
+        self.actTitle = actTitle
     }
 }
 

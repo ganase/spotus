@@ -73,7 +73,20 @@ struct PlaceEditorView: View {
                     Text("\(Int(radius))m")
                 }
             }
+
+            Section {
+                EditorActionBar(
+                    canSave: !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                    onSave: {
+                        save()
+                    },
+                    onCancel: {
+                        dismiss()
+                    }
+                )
+            }
         }
+        .themedScreenBackground()
         .navigationTitle(originalPlaceId == nil ? "場所を追加" : "場所を編集")
         .sheet(isPresented: $isMapPickerPresented) {
             MapCoordinatePickerView(
@@ -84,20 +97,6 @@ struct PlaceEditorView: View {
                 category: category
             )
             .environmentObject(appState)
-        }
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("キャンセル") {
-                    dismiss()
-                }
-            }
-
-            ToolbarItem(placement: .confirmationAction) {
-                Button("保存") {
-                    save()
-                }
-                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            }
         }
     }
 

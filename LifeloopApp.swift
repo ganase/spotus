@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct SpotusApp: App {
+struct LifeloopApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var appState = AppState()
 

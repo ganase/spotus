@@ -2,8 +2,8 @@ import Foundation
 import UserNotifications
 
 final class NotificationService: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
-    static let categoryIdentifier = "SPOTUS_ACTIONS"
-    static let mapActionIdentifier = "SPOTUS_SHOW_MAP"
+    static let categoryIdentifier = "LIFELOOP_ACTIONS"
+    static let mapActionIdentifier = "LIFELOOP_SHOW_MAP"
 
     @Published private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
@@ -32,9 +32,9 @@ final class NotificationService: NSObject, ObservableObject, UNUserNotificationC
         }
     }
 
-    func deliver(title: String, subtitle: String, body: String, logId: UUID, placeId: UUID, courseId: UUID?) {
+    func deliver(title: String, subtitle: String, body: String, logId: UUID, placeId: UUID, courseId: UUID?, at date: Date? = nil) {
         let content = UNMutableNotificationContent()
-        content.title = title
+        content.title = "🐈‍⬛ \(title)"
         content.subtitle = subtitle
         content.body = body
         content.sound = .default
@@ -45,9 +45,19 @@ final class NotificationService: NSObject, ObservableObject, UNUserNotificationC
             "courseId": courseId?.uuidString ?? ""
         ]
 
-        // A nil trigger delivers immediately. Region Monitoring already supplied the timing.
-        let request = UNNotificationRequest(identifier: logId.uuidString, content: content, trigger: nil)
-        center.add(request)
+        let trigger = date.map {
+            UNCalendarNotificationTrigger(
+                dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: $0),
+                repeats: false
+            )
+        }
+        let identifier = date == nil ? logId.uuidString : "\(logId.uuidString)-snooze-\(Int(date?.timeIntervalSince1970 ?? 0))"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.add(request) { error in
+            if let error {
+                print("NotificationService delivery failed: \(error)")
+            }
+        }
     }
 
     private func configureCategories() {

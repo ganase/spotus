@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <title>Place Tab Icon</title>
+  <rect width="512" height="512" fill="none"/>
+  <g stroke="#007AFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="256" cy="92" r="34"/>
+    <path d="M256 126v164"/>
+    <path d="M170 318h172"/>
+    <ellipse cx="256" cy="318" rx="44" ry="26"/>
+  </g>
+  <text
+    x="256"
+    y="420"
+    text-anchor="middle"
+    font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif"
+    font-size="54"
+    font-weight="700"
+    fill="#007AFF">Place</text>
+</svg>

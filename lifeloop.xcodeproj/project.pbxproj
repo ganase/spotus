@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		010000000000000000000001 /* SpotusApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000001 /* SpotusApp.swift */; };
+		010000000000000000000001 /* LifeloopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000001 /* LifeloopApp.swift */; };
 		010000000000000000000002 /* Place.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000002 /* Place.swift */; };
 		010000000000000000000003 /* HabitCourse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000003 /* HabitCourse.swift */; };
 		010000000000000000000004 /* HabitRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000004 /* HabitRule.swift */; };
@@ -23,13 +23,13 @@
 		01000000000000000000000E /* CourseListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02000000000000000000000E /* CourseListView.swift */; };
 		01000000000000000000000F /* PlaceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02000000000000000000000F /* PlaceListView.swift */; };
 		010000000000000000000010 /* PlaceEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000010 /* PlaceEditorView.swift */; };
-		010000000000000000000011 /* RuleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000011 /* RuleListView.swift */; };
+		010000000000000000000011 /* ActListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000011 /* ActListView.swift */; };
 		010000000000000000000012 /* LogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000012 /* LogListView.swift */; };
 		010000000000000000000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 020000000000000000000014 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		020000000000000000000001 /* SpotusApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotusApp.swift; sourceTree = "<group>"; };
+		020000000000000000000001 /* LifeloopApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeloopApp.swift; sourceTree = "<group>"; };
 		020000000000000000000002 /* Place.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Place.swift; sourceTree = "<group>"; };
 		020000000000000000000003 /* HabitCourse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitCourse.swift; sourceTree = "<group>"; };
 		020000000000000000000004 /* HabitRule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitRule.swift; sourceTree = "<group>"; };
@@ -45,11 +45,11 @@
 		02000000000000000000000E /* CourseListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseListView.swift; sourceTree = "<group>"; };
 		02000000000000000000000F /* PlaceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceListView.swift; sourceTree = "<group>"; };
 		020000000000000000000010 /* PlaceEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceEditorView.swift; sourceTree = "<group>"; };
-		020000000000000000000011 /* RuleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuleListView.swift; sourceTree = "<group>"; };
+		020000000000000000000011 /* ActListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActListView.swift; sourceTree = "<group>"; };
 		020000000000000000000012 /* LogListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogListView.swift; sourceTree = "<group>"; };
 		020000000000000000000013 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		020000000000000000000014 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		020000000000000000000015 /* Spotus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Spotus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		020000000000000000000015 /* lifeloop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lifeloop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,22 +66,22 @@
 		040000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				040000000000000000000002 /* Spotus */,
+				040000000000000000000002 /* lifeloop */,
 				040000000000000000000006 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		040000000000000000000002 /* Spotus */ = {
+		040000000000000000000002 /* lifeloop */ = {
 			isa = PBXGroup;
 			children = (
-				020000000000000000000001 /* SpotusApp.swift */,
+				020000000000000000000001 /* LifeloopApp.swift */,
 				040000000000000000000003 /* Models */,
 				040000000000000000000004 /* Services */,
 				040000000000000000000005 /* Views */,
 				020000000000000000000014 /* Assets.xcassets */,
 				020000000000000000000013 /* Info.plist */,
 			);
-			name = Spotus;
+			name = lifeloop;
 			sourceTree = "<group>";
 			usesTabs = 0;
 		};
@@ -117,7 +117,7 @@
 				02000000000000000000000E /* CourseListView.swift */,
 				02000000000000000000000F /* PlaceListView.swift */,
 				020000000000000000000010 /* PlaceEditorView.swift */,
-				020000000000000000000011 /* RuleListView.swift */,
+				020000000000000000000011 /* ActListView.swift */,
 				020000000000000000000012 /* LogListView.swift */,
 			);
 			path = Views;
@@ -126,7 +126,7 @@
 		040000000000000000000006 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				020000000000000000000015 /* Spotus.app */,
+				020000000000000000000015 /* lifeloop.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -134,9 +134,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		050000000000000000000001 /* Spotus */ = {
+		050000000000000000000001 /* lifeloop */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "Spotus" */;
+			buildConfigurationList = 0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "lifeloop" */;
 			buildPhases = (
 				060000000000000000000001 /* Sources */,
 				030000000000000000000001 /* Frameworks */,
@@ -146,9 +146,9 @@
 			);
 			dependencies = (
 			);
-			name = Spotus;
-			productName = Spotus;
-			productReference = 020000000000000000000015 /* Spotus.app */;
+			name = lifeloop;
+			productName = lifeloop;
+			productReference = 020000000000000000000015 /* lifeloop.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -166,7 +166,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 0A0000000000000000000001 /* Build configuration list for PBXProject "Spotus" */;
+			buildConfigurationList = 0A0000000000000000000001 /* Build configuration list for PBXProject "lifeloop" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = ja;
 			hasScannedForEncodings = 0;
@@ -180,7 +180,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				050000000000000000000001 /* Spotus */,
+				050000000000000000000001 /* lifeloop */,
 			);
 		};
 /* End PBXProject section */
@@ -201,7 +201,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				010000000000000000000001 /* SpotusApp.swift in Sources */,
+				010000000000000000000001 /* LifeloopApp.swift in Sources */,
 				010000000000000000000002 /* Place.swift in Sources */,
 				010000000000000000000003 /* HabitCourse.swift in Sources */,
 				010000000000000000000004 /* HabitRule.swift in Sources */,
@@ -217,7 +217,7 @@
 				01000000000000000000000E /* CourseListView.swift in Sources */,
 				01000000000000000000000F /* PlaceListView.swift in Sources */,
 				010000000000000000000010 /* PlaceEditorView.swift in Sources */,
-				010000000000000000000011 /* RuleListView.swift in Sources */,
+				010000000000000000000011 /* ActListView.swift in Sources */,
 				010000000000000000000012 /* LogListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -383,7 +383,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		0A0000000000000000000001 /* Build configuration list for PBXProject "Spotus" */ = {
+		0A0000000000000000000001 /* Build configuration list for PBXProject "lifeloop" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				090000000000000000000001 /* Debug */,
@@ -392,7 +392,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "Spotus" */ = {
+		0B0000000000000000000001 /* Build configuration list for PBXNativeTarget "lifeloop" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				090000000000000000000003 /* Debug */,

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Spotus</string>
+	<string>lifeloop</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -28,6 +28,10 @@
 	<string>登録した場所に到着したとき、バックグラウンドでも生活習慣の通知を出すために位置情報を使用します。</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>現在地から場所を登録し、登録地点の近くで通知を出すために位置情報を使用します。</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchScreen</key>

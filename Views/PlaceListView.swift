@@ -28,6 +28,8 @@ struct PlaceListView: View {
 
                             Toggle("", isOn: binding(for: place))
                                 .labelsHidden()
+
+                            DisclosureChevron()
                         }
                     }
                     .swipeActions(edge: .leading) {
@@ -44,7 +46,9 @@ struct PlaceListView: View {
                 Text("各地点を左にスワイプすると、実際の移動を待たずに通知経路を確認できる「テスト」を使えます。iOSのRegion Monitoringは同時監視数に上限があるため、MVPでは有効な地点の先頭20件を登録します。")
             }
         }
-        .navigationTitle("Place")
+        .themedScreenBackground()
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
